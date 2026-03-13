@@ -213,7 +213,7 @@
     function addNewEntry() {
       document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
       document.getElementById('input-raz').value = '';
-      ['bundza','250','1kg','3kg','500','zw','gab'].forEach(id => {
+      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
         document.getElementById(`input-${id}`).value = 0;
       });
       document.getElementById('input-valoda').value = 'LV';
@@ -239,7 +239,6 @@
         kg3:    Number(document.getElementById('input-3kg').value)   || 0,
         pak500: Number(document.getElementById('input-500').value)   || 0,
         zw:     Number(document.getElementById('input-zw').value)    || 0,
-        gab:    Number(document.getElementById('input-gab').value)   || 0,
         valoda: document.getElementById('input-valoda').value
       };
 
