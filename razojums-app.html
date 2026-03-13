@@ -53,8 +53,7 @@
               <th>1 kg paka</th>
               <th>3 kg paka</th>
               <th>500 paka</th>
-              <th>ZW*</th>
-              <th>GAB.</th>
+              <th>ZW</th>
               <th></th>
             </tr>
           </thead>
@@ -68,7 +67,6 @@
               <td id="total-3kg">0</td>
               <td id="total-500">0</td>
               <td id="total-zw">0</td>
-              <td id="total-gab">0</td>
               <td></td>
             </tr>
           </tfoot>
@@ -173,7 +171,7 @@
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
-      let tBundza=0, t250=0, t1kg=0, t3kg=0, t500=0, tZw=0, tGab=0;
+      let tBundza=0, t250=0, t1kg=0, t3kg=0, t500=0, tZw=0;
 
       entries.forEach(entry => {
         const tr = document.createElement('tr');
@@ -187,7 +185,6 @@
           <td>${entry.kg3}</td>
           <td>${entry.pak500}</td>
           <td>${entry.zw}</td>
-          <td class="font-semibold">${entry.gab}</td>
           <td>${entry.valoda}</td>
         `;
         tbody.appendChild(tr);
@@ -198,7 +195,6 @@
         t3kg    += entry.kg3;
         t500    += entry.pak500;
         tZw     += entry.zw;
-        tGab    += entry.gab;
       });
 
       document.getElementById('total-bundza').textContent = tBundza;
@@ -207,7 +203,6 @@
       document.getElementById('total-3kg').textContent    = t3kg;
       document.getElementById('total-500').textContent    = t500;
       document.getElementById('total-zw').textContent     = tZw;
-      document.getElementById('total-gab').textContent    = tGab;
     }
 
     function addNewEntry() {
