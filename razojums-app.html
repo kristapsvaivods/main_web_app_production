@@ -15,7 +15,7 @@
 
   <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl font-bold text-emerald-700 mb-2">Ražošanas uzskaite</h1>
-    <p class="mb-6 text-red-600">Check F12 → Console for debug info</p>
+    <p class="text-emerald-600 mb-6">Test version - check F12 Console for logs</p>
 
     <button onclick="addNewEntry()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl mb-6">
       + Pievienot ierakstu
@@ -41,33 +41,35 @@
     </div>
   </div>
 
-  <!-- Simple Modal -->
+  <!-- Modal -->
   <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl w-full max-w-md mx-4 p-6">
-      <h2 class="text-xl font-bold mb-4">Jauns ieraksts</h2>
-      
-      <input id="input-date" type="date" class="w-full border p-3 rounded mb-3">
-      <input id="input-raz" type="text" placeholder="Ražojums" class="w-full border p-3 rounded mb-3">
+    <div class="bg-white rounded-3xl w-full max-w-md mx-4">
+      <div class="p-6">
+        <h2 class="text-xl font-bold mb-4">Jauns ieraksts</h2>
+        
+        <input id="input-date" type="date" class="w-full border p-3 rounded mb-3">
+        <input id="input-raz" type="text" placeholder="Ražojums" class="w-full border p-3 rounded mb-3">
 
-      <div class="grid grid-cols-3 gap-3 text-sm mb-4">
-        <div><input id="input-bundza" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-250" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-1kg" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-3kg" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-500" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-zw" type="number" value="0" class="w-full border p-2 text-center"></div>
+        <div class="grid grid-cols-3 gap-3 text-sm">
+          <div><input id="input-bundza" type="number" value="0" class="w-full border p-2 text-center"></div>
+          <div><input id="input-250" type="number" value="0" class="w-full border p-2 text-center"></div>
+          <div><input id="input-1kg" type="number" value="0" class="w-full border p-2 text-center"></div>
+          <div><input id="input-3kg" type="number" value="0" class="w-full border p-2 text-center"></div>
+          <div><input id="input-500" type="number" value="0" class="w-full border p-2 text-center"></div>
+          <div><input id="input-zw" type="number" value="0" class="w-full border p-2 text-center"></div>
+        </div>
+
+        <select id="input-valoda" class="w-full border p-3 rounded mt-4">
+          <option value="LV">LV</option>
+          <option value="ENG">ENG</option>
+          <option value="EE">EE</option>
+          <option value="LT">LT</option>
+        </select>
       </div>
 
-      <select id="input-valoda" class="w-full border p-3 rounded">
-        <option value="LV">LV</option>
-        <option value="ENG">ENG</option>
-        <option value="EE">EE</option>
-        <option value="LT">LT</option>
-      </select>
-
-      <div class="flex gap-3 mt-6">
-        <button onclick="closeModal()" class="flex-1 py-3 border rounded-xl">Atcelt</button>
-        <button onclick="saveEntry()" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold">Saglabāt</button>
+      <div class="flex border-t">
+        <button onclick="closeModal()" class="flex-1 py-4 font-medium">Atcelt</button>
+        <button onclick="saveEntry()" class="flex-1 py-4 bg-emerald-600 text-white font-semibold">Saglabāt</button>
       </div>
     </div>
   </div>
@@ -79,10 +81,8 @@
 
     async function loadData() {
       try {
-        console.log("Fetching data from sheet...");
         const res = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
         const data = await res.json();
-        console.log("Load response:", data);
         if (data.status === 'success') {
           entries = data.data || [];
           renderTable();
@@ -99,7 +99,7 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${e.date || '-'}</td>
-          <td>${e.razojums || '-'}</td>
+          <td class="text-left">${e.razojums || '-'}</td>
           <td>${e.bundza || 0}</td>
           <td>${e.pak250 || 0}</td>
           <td>${e.kg1 || 0}</td>
@@ -115,9 +115,7 @@
     function addNewEntry() {
       document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
       document.getElementById('input-raz').value = '';
-      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
-        document.getElementById('input-' + id).value = 0;
-      });
+      ['bundza','250','1kg','3kg','500','zw'].forEach(id => document.getElementById('input-'+id).value = 0);
       document.getElementById('input-valoda').value = 'LV';
       document.getElementById('modal').classList.remove('hidden');
     }
@@ -139,7 +137,7 @@
         valoda: document.getElementById('input-valoda').value
       };
 
-      console.log("→ Sending payload:", payload);
+      console.log("→ Sending this payload:", payload);
 
       closeModal();
 
@@ -150,15 +148,13 @@
         body: JSON.stringify(payload)
       })
       .then(() => {
-        console.log("POST request sent - waiting for sheet update...");
-        setTimeout(loadData, 2000);
+        console.log("POST request sent successfully");
+        setTimeout(loadData, 1500);   // refresh list after save
       })
       .catch(err => console.error("Fetch error:", err));
     }
 
-    window.onload = () => {
-      loadData();
-    };
+    window.onload = loadData;
   </script>
 </body>
 </html>
