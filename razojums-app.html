@@ -35,7 +35,7 @@
     <!-- Table -->
     <div class="bg-white shadow-xl rounded-3xl overflow-hidden">
       <div class="scroll-container">
-        <table class="w-full min-w-[900px] text-sm">
+        <table class="w-full min-w-[950px] text-sm">
           <thead>
             <tr class="header-bg">
               <th class="py-4">DATUMS</th>
@@ -144,13 +144,12 @@
 
         if (result.status === 'success') {
           entries = result.data || [];
-          entries.sort((a,b) => new Date(b.date) - new Date(a.date));
+          entries.sort((a, b) => new Date(b.date) - new Date(a.date));
           renderTable();
         }
       } catch (err) {
         console.error(err);
       }
-
       statusEl.classList.add('hidden');
     }
 
@@ -182,12 +181,12 @@
         `;
         tbody.appendChild(tr);
 
-        tBundza += entry.bundza || 0;
-        t250    += entry.pak250 || 0;
-        t1kg    += entry.kg1    || 0;
-        t3kg    += entry.kg3    || 0;
-        t500    += entry.pak500 || 0;
-        tZw     += entry.zw     || 0;
+        tBundza += Number(entry.bundza) || 0;
+        t250    += Number(entry.pak250) || 0;
+        t1kg    += Number(entry.kg1)    || 0;
+        t3kg    += Number(entry.kg3)    || 0;
+        t500    += Number(entry.pak500) || 0;
+        tZw     += Number(entry.zw)     || 0;
       });
 
       document.getElementById('total-bundza').textContent = tBundza;
@@ -219,45 +218,41 @@
       if (!date) return alert('Izvēlies datumu!');
 
       const payload = {
-        date,
+        date:   date,
         raz:    document.getElementById('input-raz').value.trim(),
         bundza: Number(document.getElementById('input-bundza').value) || 0,
-        pak250: Number(document.getElementById('input-250').value)    || 0,
-        kg1:    Number(document.getElementById('input-1kg').value)    || 0,
-        kg3:    Number(document.getElementById('input-3kg').value)    || 0,
-        pak500: Number(document.getElementById('input-500').value)    || 0,
-        zw:     Number(document.getElementById('input-zw').value)     || 0,
+        pak250: Number(document.getElementById('input-250').value) || 0,
+        kg1:    Number(document.getElementById('input-1kg').value) || 0,
+        kg3:    Number(document.getElementById('input-3kg').value) || 0,
+        pak500: Number(document.getElementById('input-500').value) || 0,
+        zw:     Number(document.getElementById('input-zw').value) || 0,
         valoda: document.getElementById('input-valoda').value
       };
 
       // Close modal immediately
       closeModal();
 
-      // Show quick success message
+      // Show success message
       const statusEl = document.getElementById('sync-status');
       statusEl.classList.remove('hidden');
       statusEl.textContent = "Saglabāts! ✓";
 
-      // Send data in background (fire and forget)
+      // Send data in background
       fetch(SHEET_WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
-        redirect: 'follow',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
-      }).catch(err => console.error('Save error:', err));
+      }).catch(err => console.error('Save failed:', err));
 
-      // Refresh table after short delay
+      // Refresh list after short delay
       setTimeout(() => {
         loadData();
-        // Hide success message after refresh
-        setTimeout(() => {
-          statusEl.classList.add('hidden');
-        }, 1000);
-      }, 800);
+        setTimeout(() => statusEl.classList.add('hidden'), 1200);
+      }, 1000);
     }
 
-    // Initialize
+    // Init
     window.addEventListener('load', async () => {
       await loadData();
       document.getElementById('modal').addEventListener('click', e => {
