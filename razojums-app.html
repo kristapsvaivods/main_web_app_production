@@ -129,7 +129,7 @@
   </div>
 
   <script>
-    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLDbQSNeDftMQAzxkCc-Xgocslma6fvHi3lri91-LP0qFm1C9UYFx-vwpH2RN7CDZj/exec";
+    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUh_fnF2ETkSXqbqzfBHW4PIRQgUXnwf8sgzxL-riACRNvDSKjC4xN2liTw1Wzo8tb/exec";
 
     let entries = [];
 
@@ -237,6 +237,9 @@
       statusEl.classList.remove('hidden');
       statusEl.textContent = "Saglabā...";
 
+      // Close modal immediately when user clicks "Saglabāt"
+      closeModal();
+
       try {
         await fetch(SHEET_WEB_APP_URL, {
           method: 'POST',
@@ -246,13 +249,15 @@
           body: JSON.stringify(payload)
         });
 
-        // Give Apps Script time to process
+        // Wait a bit then refresh the list
         await new Promise(r => setTimeout(r, 1800));
         await loadData();
-        closeModal();
       } catch (err) {
         console.error(err);
-        alert("Saglabāšanas kļūda. Pārbaudi internetu vai Apps Script deploy.");
+        // Optional: show error after modal is already closed
+        setTimeout(() => {
+          alert("Saglabāšanas kļūda. Pārbaudi internetu vai Apps Script.");
+        }, 500);
       }
 
       statusEl.classList.add('hidden');
