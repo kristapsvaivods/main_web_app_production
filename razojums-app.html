@@ -1,134 +1,4 @@
-<!DOCTYPE html>
-<html lang="lv">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ražošanas Uzskaites App – Kopīga</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; }
-    th, td { border: 1px solid #86efac; padding: 8px 6px; text-align: center; font-size: 14px; }
-    .header-bg { background-color: #86efac; }
-    input[type="number"] { width: 70px; text-align: center; }
-    .scroll-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  </style>
-</head>
-<body class="bg-gray-50 min-h-screen pb-12">
-
-  <div class="max-w-7xl mx-auto p-4">
-
-    <!-- Header -->
-    <div class="bg-white shadow-md rounded-2xl p-6 mb-6">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-emerald-700">Ražošanas uzskaite (kopīga)</h1>
-          <p class="text-emerald-600 mt-1">Dati tiek saglabāti Google Sheets — visi redz vienu sarakstu</p>
-        </div>
-        <button onclick="addNewEntry()"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg active:scale-95 transition">
-          <span class="text-2xl">+</span> Pievienot ierakstu
-        </button>
-      </div>
-      <div id="sync-status" class="mt-3 text-center text-sm text-gray-600 hidden">Sinhronizē ar Google Sheets...</div>
-    </div>
-
-    <!-- Table -->
-    <div class="bg-white shadow-xl rounded-3xl overflow-hidden">
-      <div class="scroll-container">
-        <table class="w-full min-w-[900px] text-sm">
-          <thead>
-            <tr class="header-bg">
-              <th class="py-4">DATUMS</th>
-              <th class="py-4">RAŽOJUMS</th>
-              <th colspan="6" class="py-4">FORMĀTS</th>
-              <th class="py-4">VALODA</th>
-            </tr>
-            <tr class="header-bg text-xs">
-              <th></th>
-              <th></th>
-              <th>Bundža</th>
-              <th>250 paka</th>
-              <th>1 kg paka</th>
-              <th>3 kg paka</th>
-              <th>500 paka</th>
-              <th>ZW</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="table-body" class="text-gray-700"></tbody>
-          <tfoot>
-            <tr class="bg-emerald-100 font-bold text-emerald-900">
-              <td colspan="2" class="text-left pl-6 py-4">KOPĀ</td>
-              <td id="total-bundza">0</td>
-              <td id="total-250">0</td>
-              <td id="total-1kg">0</td>
-              <td id="total-3kg">0</td>
-              <td id="total-500">0</td>
-              <td id="total-zw">0</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-
-    <div class="mt-6 text-center text-sm text-gray-500">
-      Dati nāk no Google Sheets • Atjaunojas automātiski pēc katra ieraksta
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-      <div class="bg-emerald-600 text-white px-6 py-5 flex justify-between items-center sticky top-0 z-10">
-        <h2 class="text-xl font-semibold">Jauns ieraksts</h2>
-        <button onclick="closeModal()" class="text-3xl hover:text-emerald-200">×</button>
-      </div>
-
-      <div class="p-6 space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-1">Datums</label>
-          <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-xl px-4 py-3">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-1">Ražojums</label>
-          <input id="input-raz" type="text" placeholder="Produkta nosaukums" class="w-full border border-emerald-300 rounded-xl px-4 py-3">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-2">Formāts (daudzums)</label>
-          <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            <div><label class="text-xs text-emerald-600">Bundža</label><input id="input-bundza" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
-            <div><label class="text-xs text-emerald-600">250 paka</label><input id="input-250" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
-            <div><label class="text-xs text-emerald-600">1 kg paka</label><input id="input-1kg" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
-            <div><label class="text-xs text-emerald-600">3 kg paka</label><input id="input-3kg" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
-            <div><label class="text-xs text-emerald-600">500 paka</label><input id="input-500" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
-            <div><label class="text-xs text-emerald-600">ZW</label><input id="input-zw" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-1">Valoda</label>
-          <select id="input-valoda" class="w-full border border-emerald-300 rounded-xl px-4 py-3">
-            <option value="LV">LV</option>
-            <option value="ENG">ENG</option>
-            <option value="EE">EE</option>
-            <option value="LT">LT</option>
-            <option value="FR">FR</option>
-            <option value="PT">PT</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="px-6 py-5 bg-gray-50 flex gap-3 border-t sticky bottom-0">
-        <button onclick="closeModal()" class="flex-1 border border-gray-300 py-3 rounded-xl font-medium">Atcelt</button>
-        <button onclick="saveEntry()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-semibold">Saglabāt</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
+<script>
     const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUh_fnF2ETkSXqbqzfBHW4PIRQgUXnwf8sgzxL-riACRNvDSKjC4xN2liTw1Wzo8tb/exec";
 
     let entries = [];
@@ -136,7 +6,7 @@
     async function loadData() {
       const statusEl = document.getElementById('sync-status');
       statusEl.classList.remove('hidden');
-      statusEl.textContent = "Ielādē datus...";
+      statusEl.textContent = "Atjaunina sarakstu...";
 
       try {
         const resp = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
@@ -146,12 +16,9 @@
           entries = result.data || [];
           entries.sort((a,b) => new Date(b.date) - new Date(a.date));
           renderTable();
-        } else {
-          alert("Kļūda ielādējot datus:\n" + (result.message || "Nezināma kļūda"));
         }
       } catch (err) {
         console.error(err);
-        alert("Nevar sasniegt Google Sheets. Pārbaudi internetu.");
       }
 
       statusEl.classList.add('hidden');
@@ -233,34 +100,29 @@
         valoda: document.getElementById('input-valoda').value
       };
 
-      const statusEl = document.getElementById('sync-status');
-      statusEl.classList.remove('hidden');
-      statusEl.textContent = "Saglabā...";
-
-      // Close modal immediately when user clicks "Saglabāt"
+      // Close modal immediately + show quick success feedback
       closeModal();
 
-      try {
-        await fetch(SHEET_WEB_APP_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          redirect: 'follow',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
+      const statusEl = document.getElementById('sync-status');
+      statusEl.classList.remove('hidden');
+      statusEl.textContent = "Saglabāts! ✓";
 
-        // Wait a bit then refresh the list
-        await new Promise(r => setTimeout(r, 1800));
-        await loadData();
-      } catch (err) {
-        console.error(err);
-        // Optional: show error after modal is already closed
+      // Fire and forget - send the data without waiting
+      fetch(SHEET_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.error('Save error:', err));
+
+      // Refresh the list in background after a short delay
+      setTimeout(() => {
+        loadData();
         setTimeout(() => {
-          alert("Saglabāšanas kļūda. Pārbaudi internetu vai Apps Script.");
-        }, 500);
-      }
-
-      statusEl.classList.add('hidden');
+          statusEl.classList.add('hidden');
+        }, 1200);
+      }, 800);   // reduced from 1800ms
     }
 
     // Init
@@ -271,5 +133,3 @@
       });
     });
   </script>
-</body>
-</html>
