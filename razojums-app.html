@@ -153,12 +153,12 @@
         `;
         tbody.appendChild(tr);
 
-        totals.bundza += Number(entry.bundza)||'';
-        totals.pak250 += Number(entry.pak250)||'';
-        totals.kg1 += Number(entry.kg1)||'';
-        totals.kg3 += Number(entry.kg3)||'';
-        totals.pak500 += Number(entry.pak500)||'';
-        totals.zw += Number(entry.zw)||'';
+        totals.bundza += Number(entry.bundza)|| 0;
+        totals.pak250 += Number(entry.pak250)|| 0;
+        totals.kg1 += Number(entry.kg1)|| 0;
+        totals.kg3 += Number(entry.kg3)|| 0;
+        totals.pak500 += Number(entry.pak500)|| 0;
+        totals.zw += Number(entry.zw)|| 0;
       });
 
       document.getElementById('total-bundza').textContent = totals.bundza;
