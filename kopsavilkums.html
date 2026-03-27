@@ -74,7 +74,6 @@
         const result = await resp.json();
         if (result.status === 'success') {
           allEntries = result.data || [];
-          console.log("All entries loaded:", allEntries);
         }
       } catch (e) {
         console.error(e);
@@ -83,38 +82,22 @@
 
     function normalizeDate(dateValue) {
       if (!dateValue) return '';
-      
-      let str = String(dateValue);
-      
-      // Case 1: Full date object string like "Fri Mar 27 2026 00:00:00 GMT+0200"
-      if (str.includes('GMT') || str.includes('2026')) {
-        const d = new Date(str);
-        if (!isNaN(d)) {
-          return d.toISOString().split('T')[0]; // returns YYYY-MM-DD
-        }
-      }
-      
-      // Case 2: Already YYYY-MM-DD
-      if (str.length === 10 && str.includes('-')) {
-        return str;
-      }
-      
-      // Case 3: dd.mm.yyyy
-      if (str.includes('.')) {
-        const parts = str.split('.');
-        if (parts.length === 3) {
-          return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-        }
-      }
-      
-      return str;
+
+      const d = new Date(dateValue);
+      if (isNaN(d.getTime())) return '';
+
+      // Force it to local date without time zone shift issues
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
     function loadEntriesForDate() {
       const selectedDate = document.getElementById('selected-date').value;
       if (!selectedDate) return;
 
-      document.getElementById('date-title').textContent = `Ieraksti ${selectedDate}`;
+      document.getElementById('date-title').textContent = `Ieraksti ${selectedDate.split('-').reverse().join('.')}`;
 
       const filtered = allEntries.filter(entry => {
         const entryNormalized = normalizeDate(entry.date);
