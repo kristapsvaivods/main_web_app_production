@@ -90,6 +90,8 @@
             <option value="ENG">ENG</option>
             <option value="EE">EE</option>
             <option value="LT">LT</option>
+            <option value="LT">FR</option>
+            <option value="LT">PT</option>
           </select>
         </div>
       </div>
@@ -135,22 +137,22 @@
         tr.innerHTML = `
           <td>${formatDate(entry.date)}</td>
           <td class="text-left">${entry.razojums || '-'}</td>
-          <td>${entry.bundza || 0}</td>
-          <td>${entry.pak250 || 0}</td>
-          <td>${entry.kg1 || 0}</td>
-          <td>${entry.kg3 || 0}</td>
-          <td>${entry.pak500 || 0}</td>
-          <td>${entry.zw || 0}</td>
+          <td>${entry.bundza || ''}</td>
+          <td>${entry.pak250 || ''}</td>
+          <td>${entry.kg1 || ''}</td>
+          <td>${entry.kg3 || ''}</td>
+          <td>${entry.pak500 || ''}</td>
+          <td>${entry.zw || ''}</td>
           <td>${entry.valoda || '-'}</td>
         `;
         tbody.appendChild(tr);
 
-        totals.bundza += Number(entry.bundza)||0;
-        totals.pak250 += Number(entry.pak250)||0;
-        totals.kg1 += Number(entry.kg1)||0;
-        totals.kg3 += Number(entry.kg3)||0;
-        totals.pak500 += Number(entry.pak500)||0;
-        totals.zw += Number(entry.zw)||0;
+        totals.bundza += Number(entry.bundza)||'';
+        totals.pak250 += Number(entry.pak250)||'';
+        totals.kg1 += Number(entry.kg1)||'';
+        totals.kg3 += Number(entry.kg3)||'';
+        totals.pak500 += Number(entry.pak500)||'';
+        totals.zw += Number(entry.zw)||'';
       });
 
       document.getElementById('total-bundza').textContent = totals.bundza;
@@ -177,12 +179,12 @@
       const payload = {
         date: document.getElementById('input-date').value,
         raz: document.getElementById('input-raz').value.trim(),
-        bundza: Number(document.getElementById('input-bundza').value) || -,
-        pak250: Number(document.getElementById('input-250').value) || -,
-        kg1: Number(document.getElementById('input-1kg').value) || -,
-        kg3: Number(document.getElementById('input-3kg').value) || -,
-        pak500: Number(document.getElementById('input-500').value) || -,
-        zw: Number(document.getElementById('input-zw').value) || -,
+        bundza: Number(document.getElementById('input-bundza').value) || '',
+        pak250: Number(document.getElementById('input-250').value) || '',
+        kg1: Number(document.getElementById('input-1kg').value) || '',
+        kg3: Number(document.getElementById('input-3kg').value) || '',
+        pak500: Number(document.getElementById('input-500').value) || '',
+        zw: Number(document.getElementById('input-zw').value) || '',
         valoda: document.getElementById('input-valoda').value
       };
 
