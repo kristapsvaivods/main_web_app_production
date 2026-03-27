@@ -126,7 +126,7 @@
       entries.forEach(entry => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${entry.date || '-'}</td>
+          <td>${formatDate(entry.date)}</td>
           <td class="text-left">${entry.razojums || '-'}</td>
           <td>${entry.bundza || 0}</td>
           <td>${entry.pak250 || 0}</td>
