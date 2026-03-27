@@ -3,22 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ražošanas Uzskaite</title>
+  <title>Ražošanas Uzskaite - Kopsavilkums</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: system-ui, sans-serif; }
-    th, td { padding: 10px 6px; font-size: 13px; border: 1px solid #d5c7ab; }
-    .header-bg { background-color: #d5c7ab; }
-    .input-field { width: 80px; }
+    th, td { padding: 10px 6px; font-size: 13.5px; border: 1px solid #86efac; }
+    .header-bg { background-color: #86efac; }
+    .group-row { background-color: #f8fafc; font-weight: 600; }
   </style>
 </head>
 <body class="bg-gray-50 p-4">
 
-  <div class="max-w-[850px] mx-auto">
+  <div class="max-w-[900px] mx-auto">
     <div class="bg-white shadow rounded-2xl p-5 mb-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-emerald-700">Ražošanas uzskaite</h1>
-        <button onclick="addNewEntry()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl">+ Pievienot ierakstu</button>
+        <div>
+          <h1 class="text-2xl font-bold text-emerald-700">Ražošanas uzskaite</h1>
+          <p class="text-emerald-600">Kopsavilkums pēc Ražojums + Valoda</p>
+        </div>
+        <button onclick="addNewEntry()" 
+                class="bg-emerald-600 text-white px-6 py-3 rounded-2xl flex items-center gap-2">
+          + Pievienot ierakstu
+        </button>
       </div>
       <div id="sync-status" class="mt-4 text-center text-emerald-600 hidden">Saglabāts! ✓</div>
     </div>
@@ -28,28 +34,26 @@
         <table class="w-full">
           <thead class="header-bg">
             <tr>
-              <th>DATUMS</th>
-              <th>RAŽOJUMS</th>
+              <th class="text-left">RAŽOJUMS</th>
+              <th>VALODA</th>
               <th>Bundža</th>
               <th>250 paka</th>
               <th>1 kg</th>
               <th>3 kg</th>
               <th>500 paka</th>
               <th>ZW</th>
-              <th>VALODA</th>
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
           <tfoot>
             <tr class="bg-emerald-100 font-bold">
-              <td colspan="2" class="text-left pl-5">KOPĀ</td>
+              <td colspan="2" class="text-left pl-5">KOPĀ VISI</td>
               <td id="total-bundza">0</td>
               <td id="total-250">0</td>
               <td id="total-1kg">0</td>
               <td id="total-3kg">0</td>
               <td id="total-500">0</td>
               <td id="total-zw">0</td>
-              <td></td>
             </tr>
           </tfoot>
         </table>
@@ -66,40 +70,23 @@
       </div>
       <div class="p-6 space-y-5">
         <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-1">Ražojums</label>
-          <input id="input-raz" type="text" placeholder="Kafijas veids" class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3">
+          <label class="block text-sm font-medium text-emerald-700 mb-1">Ražojums (kafijas veids)</label>
+          <input id="input-raz" type="text" placeholder="Piem. CB Classic" 
+                 class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3">
         </div>
         <div>
           <label class="block text-sm font-medium text-emerald-700 mb-1">Datums</label>
           <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
         </div>
         <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-2">Formāts</label>
-          <div class="grid grid-cols-3 gap-3">
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">Bundža</label>
-              <input id="input-bundza" type="number" min="0" class="border p-2 input-field text-center rounded-xl">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">250g</label>
-              <input id="input-250" type="number" min="0" class="border p-2 input-field text-center rounded-xl">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">1KG</label>
-              <input id="input-1kg" type="number" min="0" class="border p-2 input-field text-center rounded-xl">
-            </div>
-            <div class="text-center">
-            <label class="text-xs text-emerald-600 block mb-1">3KG</label>
-              <input id="input-3kg" type="number" min="0" class="border p-2 input-field text-center rounded-xl">
-              </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">500g</label>
-              <input id="input-500" type="number" min="0" class="border p-2 input-field text-center rounded-xl">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">ZW</label>
-              <input id="input-zw" type="number" min="0" class="border p-2 input-field text-center rounded-xl">
-            </div>
+          <label class="block text-sm font-medium text-emerald-700 mb-3">Iepakojuma daudzums</label>
+          <div class="grid grid-cols-3 gap-4">
+            <div><label class="text-xs text-emerald-600">Bundža</label><input id="input-bundza" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">250 paka</label><input id="input-250" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">1 kg</label><input id="input-1kg" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">3 kg</label><input id="input-3kg" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">500 paka</label><input id="input-500" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">ZW</label><input id="input-zw" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
           </div>
         </div>
         <div>
@@ -132,60 +119,88 @@
         const result = await resp.json();
         if (result.status === 'success') {
           entries = result.data || [];
-          entries.sort((a,b) => new Date(b.date) - new Date(a.date));
           renderTable();
         }
       } catch (e) { console.error(e); }
     }
 
-    // Format date to dd.mm.yyyy
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth()+1).toString().padStart(2, '0')}.${d.getFullYear()}`;
-        }
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+    }
 
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
-      let totals = {bundza:0, pak250:0, kg1:0, kg3:0, pak500:0, zw:0};
+      // Group by Ražojums + Valoda
+      const groups = {};
 
       entries.forEach(entry => {
+        const key = `${entry.razojums || 'Nezināms'}|${entry.valoda || 'N/A'}`;
+
+        if (!groups[key]) {
+          groups[key] = {
+            razojums: entry.razojums || 'Nezināms',
+            valoda: entry.valoda || 'N/A',
+            bundza: 0,
+            pak250: 0,
+            kg1: 0,
+            kg3: 0,
+            pak500: 0,
+            zw: 0
+          };
+        }
+
+        groups[key].bundza += Number(entry.bundza) || 0;
+        groups[key].pak250 += Number(entry.pak250) || 0;
+        groups[key].kg1 += Number(entry.kg1) || 0;
+        groups[key].kg3 += Number(entry.kg3) || 0;
+        groups[key].pak500 += Number(entry.pak500) || 0;
+        groups[key].zw += Number(entry.zw) || 0;
+      });
+
+      let grandTotals = {bundza:0, pak250:0, kg1:0, kg3:0, pak500:0, zw:0};
+
+      Object.values(groups).forEach(group => {
         const tr = document.createElement('tr');
+        tr.className = "group-row";
         tr.innerHTML = `
-          <td>${formatDate(entry.date)}</td>
-          <td class="text-left">${entry.razojums || '-'}</td>
-          <td>${entry.bundza || ''}</td>
-          <td>${entry.pak250 || ''}</td>
-          <td>${entry.kg1 || ''}</td>
-          <td>${entry.kg3 || ''}</td>
-          <td>${entry.pak500 || ''}</td>
-          <td>${entry.zw || ''}</td>
-          <td>${entry.valoda || '-'}</td>
+          <td class="font-medium">${group.razojums}</td>
+          <td>${group.valoda}</td>
+          <td>${group.bundza || ''}</td>
+          <td>${group.pak250 || ''}</td>
+          <td>${group.kg1 || ''}</td>
+          <td>${group.kg3 || ''}</td>
+          <td>${group.pak500 || ''}</td>
+          <td>${group.zw || ''}</td>
         `;
         tbody.appendChild(tr);
 
-        totals.bundza += Number(entry.bundza)|| 0;
-        totals.pak250 += Number(entry.pak250)|| 0;
-        totals.kg1 += Number(entry.kg1)|| 0;
-        totals.kg3 += Number(entry.kg3)|| 0;
-        totals.pak500 += Number(entry.pak500)|| 0;
-        totals.zw += Number(entry.zw)|| 0;
+        grandTotals.bundza += group.bundza;
+        grandTotals.pak250 += group.pak250;
+        grandTotals.kg1 += group.kg1;
+        grandTotals.kg3 += group.kg3;
+        grandTotals.pak500 += group.pak500;
+        grandTotals.zw += group.zw;
       });
 
-      document.getElementById('total-bundza').textContent = totals.bundza;
-      document.getElementById('total-250').textContent = totals.pak250;
-      document.getElementById('total-1kg').textContent = totals.kg1;
-      document.getElementById('total-3kg').textContent = totals.kg3;
-      document.getElementById('total-500').textContent = totals.pak500;
-      document.getElementById('total-zw').textContent = totals.zw;
+      // Update grand totals
+      document.getElementById('total-bundza').textContent = grandTotals.bundza || '';
+      document.getElementById('total-250').textContent = grandTotals.pak250 || '';
+      document.getElementById('total-1kg').textContent = grandTotals.kg1 || '';
+      document.getElementById('total-3kg').textContent = grandTotals.kg3 || '';
+      document.getElementById('total-500').textContent = grandTotals.pak500 || '';
+      document.getElementById('total-zw').textContent = grandTotals.zw || '';
     }
 
     function addNewEntry() {
       document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
       document.getElementById('input-raz').value = '';
-      ['bundza','250','1kg','3kg','500','zw'].forEach(id => document.getElementById('input-'+id).value = 0);
+      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
+        document.getElementById('input-'+id).value = '';
+      });
       document.getElementById('input-valoda').value = 'LV';
       document.getElementById('modal').classList.remove('hidden');
     }
@@ -198,16 +213,19 @@
       const payload = {
         date: document.getElementById('input-date').value,
         raz: document.getElementById('input-raz').value.trim(),
-        bundza: Number(document.getElementById('input-bundza').value) || '',
-        pak250: Number(document.getElementById('input-250').value) || '',
-        kg1: Number(document.getElementById('input-1kg').value) || '',
-        kg3: Number(document.getElementById('input-3kg').value) || '',
-        pak500: Number(document.getElementById('input-500').value) || '',
-        zw: Number(document.getElementById('input-zw').value) || '',
+        bundza: Number(document.getElementById('input-bundza').value) || 0,
+        pak250: Number(document.getElementById('input-250').value) || 0,
+        kg1: Number(document.getElementById('input-1kg').value) || 0,
+        kg3: Number(document.getElementById('input-3kg').value) || 0,
+        pak500: Number(document.getElementById('input-500').value) || 0,
+        zw: Number(document.getElementById('input-zw').value) || 0,
         valoda: document.getElementById('input-valoda').value
       };
 
       closeModal();
+
+      const statusEl = document.getElementById('sync-status');
+      statusEl.classList.remove('hidden');
 
       fetch(SHEET_WEB_APP_URL, {
         method: 'POST',
@@ -216,10 +234,9 @@
         body: JSON.stringify(payload)
       });
 
-      document.getElementById('sync-status').classList.remove('hidden');
       setTimeout(() => {
         loadData();
-        setTimeout(() => document.getElementById('sync-status').classList.add('hidden'), 1500);
+        setTimeout(() => statusEl.classList.add('hidden'), 1500);
       }, 1200);
     }
 
