@@ -3,96 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ražošanas Uzskaite - Visi Ieraksti</title>
+  <title>Ražošanas Uzskaite - Kopsavilkums</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: system-ui, sans-serif; }
-    th, td { padding: 10px 8px; font-size: 13.5px; border: 1px solid #86efac; }
+    th, td { padding: 11px 8px; font-size: 14px; border: 1px solid #86efac; }
     .header-bg { background-color: #86efac; }
+    .group-row { background-color: #f0fdf4; font-weight: 500; }
   </style>
 </head>
 <body class="bg-gray-50 p-4">
 
   <div class="max-w-5xl mx-auto">
     <div class="bg-white shadow rounded-2xl p-6 mb-6">
-      <h1 class="text-2xl font-bold text-emerald-700">Ražošanas uzskaite - Visi ieraksti</h1>
-      <p class="text-emerald-600">Debug versija - redzēsim, kādi dati nāk no Google Sheets</p>
+      <h1 class="text-2xl font-bold text-emerald-700">Ražošanas kopsavilkums</h1>
+      <p class="text-emerald-600">Grupēts pēc Ražojums + Valoda</p>
     </div>
 
     <div class="bg-white shadow-xl rounded-3xl overflow-hidden">
-      <div class="p-4 bg-gray-50 border-b flex justify-between">
-        <button onclick="addNewEntry()" class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl">
-          + Jauns ieraksts
-        </button>
-        <button onclick="loadData()" class="text-emerald-600 font-medium">↻ Atjaunot datus</button>
-      </div>
-
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="header-bg">
             <tr>
-              <th>DATUMS</th>
-              <th>RAŽOJUMS</th>
+              <th class="text-left pl-6">RAŽOJUMS</th>
+              <th>VALODA</th>
               <th>Bundža</th>
               <th>250 paka</th>
               <th>1 kg</th>
               <th>3 kg</th>
               <th>500 paka</th>
               <th>ZW</th>
-              <th>VALODA</th>
             </tr>
           </thead>
-          <tbody id="table-body" class="text-sm"></tbody>
+          <tbody id="table-body"></tbody>
+          <tfoot>
+            <tr class="bg-emerald-100 font-bold">
+              <td colspan="2" class="text-left pl-6">KOPĀ VISI</td>
+              <td id="total-bundza">0</td>
+              <td id="total-250">0</td>
+              <td id="total-1kg">0</td>
+              <td id="total-3kg">0</td>
+              <td id="total-500">0</td>
+              <td id="total-zw">0</td>
+            </tr>
+          </tfoot>
         </table>
-      </div>
-    </div>
-
-    <div class="mt-6 bg-white p-4 rounded-2xl shadow text-xs">
-      <h3 class="font-medium mb-2">Raw Data from Google Sheets:</h3>
-      <pre id="raw-debug" class="bg-gray-100 p-3 rounded overflow-auto max-h-96"></pre>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md">
-      <div class="bg-emerald-600 text-white p-5 rounded-t-3xl flex justify-between">
-        <h2 class="font-semibold">Jauns ieraksts</h2>
-        <button onclick="closeModal()" class="text-3xl">×</button>
-      </div>
-      <div class="p-6 space-y-5">
-        <div>
-          <label class="block text-sm font-medium mb-1">Ražojums</label>
-          <input id="input-raz" type="text" placeholder="Kafijas veids" class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Datums</label>
-          <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">Formāts</label>
-          <div class="grid grid-cols-3 gap-3">
-            <input id="input-bundza" type="number" min="0" class="border p-2 text-center rounded-xl" placeholder="Bundža">
-            <input id="input-250" type="number" min="0" class="border p-2 text-center rounded-xl" placeholder="250">
-            <input id="input-1kg" type="number" min="0" class="border p-2 text-center rounded-xl" placeholder="1kg">
-            <input id="input-3kg" type="number" min="0" class="border p-2 text-center rounded-xl" placeholder="3kg">
-            <input id="input-500" type="number" min="0" class="border p-2 text-center rounded-xl" placeholder="500">
-            <input id="input-zw" type="number" min="0" class="border p-2 text-center rounded-xl" placeholder="ZW">
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Valoda</label>
-          <select id="input-valoda" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
-            <option value="LV">LV</option>
-            <option value="ENG">ENG</option>
-            <option value="EE">EE</option>
-            <option value="LT">LT</option>
-          </select>
-        </div>
-      </div>
-      <div class="border-t flex">
-        <button onclick="closeModal()" class="flex-1 py-4">Atcelt</button>
-        <button onclick="saveEntry()" class="flex-1 py-4 bg-emerald-600 text-white font-semibold">Saglabāt</button>
       </div>
     </div>
   </div>
@@ -107,84 +62,80 @@
         const resp = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
         const result = await resp.json();
 
-        console.log("Full response from Google Sheets:", result);
-
         if (result.status === 'success') {
           entries = result.data || [];
-          document.getElementById('raw-debug').textContent = JSON.stringify(entries, null, 2);
-          renderTable();
-        } else {
-          console.error("Server error:", result.message);
+          renderGroupedTable();
         }
       } catch (e) {
         console.error("Load error:", e);
       }
     }
 
-    function renderTable() {
+    function renderGroupedTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
+      const groups = {};
+
       entries.forEach(entry => {
+        const key = `${entry.razojums || 'Nezināms'} | ${entry.valoda || 'N/A'}`;
+
+        if (!groups[key]) {
+          groups[key] = {
+            razojums: entry.razojums || 'Nezināms',
+            valoda: entry.valoda || 'N/A',
+            bundza: 0,
+            pak250: 0,
+            kg1: 0,
+            kg3: 0,
+            pak500: 0,
+            zw: 0
+          };
+        }
+
+        groups[key].bundza += Number(entry.bundza) || 0;
+        groups[key].pak250 += Number(entry.pak250) || 0;
+        groups[key].kg1 += Number(entry.kg1) || 0;
+        groups[key].kg3 += Number(entry.kg3) || 0;
+        groups[key].pak500 += Number(entry.pak500) || 0;
+        groups[key].zw += Number(entry.zw) || 0;
+      });
+
+      let grandTotals = {bundza:0, pak250:0, kg1:0, kg3:0, pak500:0, zw:0};
+
+      Object.values(groups).forEach(group => {
         const tr = document.createElement('tr');
+        tr.className = "group-row";
         tr.innerHTML = `
-          <td>${entry.date || '-'}</td>
-          <td class="text-left">${entry.razojums || entry.raz || '-'}</td>
-          <td>${entry.bundza || ''}</td>
-          <td>${entry.pak250 || ''}</td>
-          <td>${entry.kg1 || ''}</td>
-          <td>${entry.kg3 || ''}</td>
-          <td>${entry.pak500 || ''}</td>
-          <td>${entry.zw || ''}</td>
-          <td>${entry.valoda || '-'}</td>
+          <td class="pl-6">${group.razojums}</td>
+          <td>${group.valoda}</td>
+          <td>${group.bundza || ''}</td>
+          <td>${group.pak250 || ''}</td>
+          <td>${group.kg1 || ''}</td>
+          <td>${group.kg3 || ''}</td>
+          <td>${group.pak500 || ''}</td>
+          <td>${group.zw || ''}</td>
         `;
         tbody.appendChild(tr);
+
+        grandTotals.bundza += group.bundza;
+        grandTotals.pak250 += group.pak250;
+        grandTotals.kg1 += group.kg1;
+        grandTotals.kg3 += group.kg3;
+        grandTotals.pak500 += group.pak500;
+        grandTotals.zw += group.zw;
       });
 
-      if (entries.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-gray-500">Nav ierakstu</td></tr>`;
-      }
+      // Update grand totals
+      document.getElementById('total-bundza').textContent = grandTotals.bundza || '';
+      document.getElementById('total-250').textContent = grandTotals.pak250 || '';
+      document.getElementById('total-1kg').textContent = grandTotals.kg1 || '';
+      document.getElementById('total-3kg').textContent = grandTotals.kg3 || '';
+      document.getElementById('total-500').textContent = grandTotals.pak500 || '';
+      document.getElementById('total-zw').textContent = grandTotals.zw || '';
     }
 
-    function addNewEntry() {
-      document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
-      document.getElementById('input-raz').value = '';
-      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
-        document.getElementById('input-'+id).value = '';
-      });
-      document.getElementById('input-valoda').value = 'LV';
-      document.getElementById('modal').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
-
-    function saveEntry() {
-      const payload = {
-        date: document.getElementById('input-date').value,
-        raz: document.getElementById('input-raz').value.trim(),
-        bundza: Number(document.getElementById('input-bundza').value) || 0,
-        pak250: Number(document.getElementById('input-250').value) || 0,
-        kg1: Number(document.getElementById('input-1kg').value) || 0,
-        kg3: Number(document.getElementById('input-3kg').value) || 0,
-        pak500: Number(document.getElementById('input-500').value) || 0,
-        zw: Number(document.getElementById('input-zw').value) || 0,
-        valoda: document.getElementById('input-valoda').value
-      };
-
-      closeModal();
-
-      fetch(SHEET_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-
-      setTimeout(loadData, 1500);
-    }
-
+    // Load data when page opens
     window.addEventListener('load', loadData);
   </script>
 </body>
