@@ -7,24 +7,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: system-ui, sans-serif; }
-    th, td { padding: 10px 6px; font-size: 13.5px; border: 1px solid #86efac; }
+    th, td { padding: 10px 6px; font-size: 13px; border: 1px solid #86efac; }
     .header-bg { background-color: #86efac; }
-    input[type="number"] { width: 62px; text-align: center; font-size: 15px; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4">
+<body class="bg-gray-50 p-4">
 
   <div class="max-w-[850px] mx-auto">
     <div class="bg-white shadow rounded-2xl p-5 mb-6">
       <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-2xl font-bold text-emerald-700">Ražošanas uzskaite</h1>
-          <p class="text-emerald-600">Kopīga versija</p>
-        </div>
-        <button onclick="addNewEntry()" 
-                class="bg-emerald-600 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium">
-          + Pievienot ierakstu
-        </button>
+        <h1 class="text-2xl font-bold text-emerald-700">Ražošanas uzskaite</h1>
+        <button onclick="addNewEntry()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl">+ Pievienot ierakstu</button>
       </div>
       <div id="sync-status" class="mt-4 text-center text-emerald-600 hidden">Saglabāts! ✓</div>
     </div>
@@ -68,51 +61,28 @@
     <div class="bg-white rounded-3xl w-full max-w-md">
       <div class="bg-emerald-600 text-white p-5 rounded-t-3xl flex justify-between">
         <h2 class="font-semibold">Jauns ieraksts</h2>
-        <button onclick="closeModal()" class="text-3xl leading-none">×</button>
+        <button onclick="closeModal()" class="text-3xl">×</button>
       </div>
-
       <div class="p-6 space-y-5">
         <div>
           <label class="block text-sm font-medium text-emerald-700 mb-1">Ražojums (kafijas veids)</label>
-          <input id="input-raz" type="text" placeholder="Ievadi nosaukumu" 
-                 class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3 text-base">
+          <input id="input-raz" type="text" placeholder="Nosaukums" class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3">
         </div>
-
         <div>
           <label class="block text-sm font-medium text-emerald-700 mb-1">Datums</label>
           <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
         </div>
-
         <div>
-          <label class="block text-sm font-medium text-emerald-700 mb-3">Iepakojuma veids un daudzums</label>
-          <div class="grid grid-cols-3 gap-4 text-sm">
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">Bundža</label>
-              <input id="input-bundza" type="number" min="0" placeholder="" class="w-full border rounded-xl py-2 text-center">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">250 paka</label>
-              <input id="input-250" type="number" min="0" placeholder="" class="w-full border rounded-xl py-2 text-center">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">1 kg</label>
-              <input id="input-1kg" type="number" min="0" placeholder="" class="w-full border rounded-xl py-2 text-center">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">3 kg</label>
-              <input id="input-3kg" type="number" min="0" placeholder="" class="w-full border rounded-xl py-2 text-center">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">500 paka</label>
-              <input id="input-500" type="number" min="0" placeholder="" class="w-full border rounded-xl py-2 text-center">
-            </div>
-            <div class="text-center">
-              <label class="text-xs text-emerald-600 block mb-1">ZW</label>
-              <input id="input-zw" type="number" min="0" placeholder="" class="w-full border rounded-xl py-2 text-center">
-            </div>
+          <label class="block text-sm font-medium text-emerald-700 mb-2">Formāts</label>
+          <div class="grid grid-cols-3 gap-3">
+            <input id="input-bundza" type="number" value="0" class="border p-2 text-center rounded-xl">
+            <input id="input-250" type="number" value="0" class="border p-2 text-center rounded-xl">
+            <input id="input-1kg" type="number" value="0" class="border p-2 text-center rounded-xl">
+            <input id="input-3kg" type="number" value="0" class="border p-2 text-center rounded-xl">
+            <input id="input-500" type="number" value="0" class="border p-2 text-center rounded-xl">
+            <input id="input-zw" type="number" value="0" class="border p-2 text-center rounded-xl">
           </div>
         </div>
-
         <div>
           <label class="block text-sm font-medium text-emerald-700 mb-1">Valoda</label>
           <select id="input-valoda" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
@@ -123,16 +93,15 @@
           </select>
         </div>
       </div>
-
       <div class="border-t flex">
-        <button onclick="closeModal()" class="flex-1 py-4 text-gray-600">Atcelt</button>
+        <button onclick="closeModal()" class="flex-1 py-4">Atcelt</button>
         <button onclick="saveEntry()" class="flex-1 py-4 bg-emerald-600 text-white font-semibold">Saglabāt</button>
       </div>
     </div>
   </div>
 
   <script>
-    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUh_fnF2ETkSXqbqzfBHW4PIRQgUXnwf8sgzxL-riACRNvDSKjC4xN2liTw1Wzo8tb/exec";
+    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWnRJ1p2t1ZT5OROnsNm8LAZ0qmGq_S1T1GwCnB1A/dev";
 
     let entries = [];
 
@@ -148,12 +117,6 @@
       } catch (e) { console.error(e); }
     }
 
-    function formatDate(iso) {
-      if (!iso) return '-';
-      const d = new Date(iso);
-      return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
-    }
-
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
@@ -163,14 +126,14 @@
       entries.forEach(entry => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${formatDate(entry.date)}</td>
-          <td class="text-left font-medium">${entry.razojums || '-'}</td>
-          <td>${entry.bundza ? entry.bundza : ''}</td>
-          <td>${entry.pak250 ? entry.pak250 : ''}</td>
-          <td>${entry.kg1 ? entry.kg1 : ''}</td>
-          <td>${entry.kg3 ? entry.kg3 : ''}</td>
-          <td>${entry.pak500 ? entry.pak500 : ''}</td>
-          <td>${entry.zw ? entry.zw : ''}</td>
+          <td>${entry.date || '-'}</td>
+          <td class="text-left">${entry.razojums || '-'}</td>
+          <td>${entry.bundza || 0}</td>
+          <td>${entry.pak250 || 0}</td>
+          <td>${entry.kg1 || 0}</td>
+          <td>${entry.kg3 || 0}</td>
+          <td>${entry.pak500 || 0}</td>
+          <td>${entry.zw || 0}</td>
           <td>${entry.valoda || '-'}</td>
         `;
         tbody.appendChild(tr);
@@ -183,20 +146,18 @@
         totals.zw += Number(entry.zw)||0;
       });
 
-      document.getElementById('total-bundza').textContent = totals.bundza || '';
-      document.getElementById('total-250').textContent = totals.pak250 || '';
-      document.getElementById('total-1kg').textContent = totals.kg1 || '';
-      document.getElementById('total-3kg').textContent = totals.kg3 || '';
-      document.getElementById('total-500').textContent = totals.pak500 || '';
-      document.getElementById('total-zw').textContent = totals.zw || '';
+      document.getElementById('total-bundza').textContent = totals.bundza;
+      document.getElementById('total-250').textContent = totals.pak250;
+      document.getElementById('total-1kg').textContent = totals.kg1;
+      document.getElementById('total-3kg').textContent = totals.kg3;
+      document.getElementById('total-500').textContent = totals.pak500;
+      document.getElementById('total-zw').textContent = totals.zw;
     }
 
     function addNewEntry() {
       document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
       document.getElementById('input-raz').value = '';
-      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
-        document.getElementById('input-'+id).value = '';
-      });
+      ['bundza','250','1kg','3kg','500','zw'].forEach(id => document.getElementById('input-'+id).value = 0);
       document.getElementById('input-valoda').value = 'LV';
       document.getElementById('modal').classList.remove('hidden');
     }
@@ -206,11 +167,8 @@
     }
 
     function saveEntry() {
-      const date = document.getElementById('input-date').value;
-      if (!date) return alert('Lūdzu izvēlies datumu!');
-
       const payload = {
-        date: date,
+        date: document.getElementById('input-date').value,
         raz: document.getElementById('input-raz').value.trim(),
         bundza: Number(document.getElementById('input-bundza').value) || 0,
         pak250: Number(document.getElementById('input-250').value) || 0,
@@ -223,9 +181,6 @@
 
       closeModal();
 
-      const statusEl = document.getElementById('sync-status');
-      statusEl.classList.remove('hidden');
-
       fetch(SHEET_WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -233,9 +188,10 @@
         body: JSON.stringify(payload)
       });
 
+      document.getElementById('sync-status').classList.remove('hidden');
       setTimeout(() => {
         loadData();
-        setTimeout(() => statusEl.classList.add('hidden'), 1400);
+        setTimeout(() => document.getElementById('sync-status').classList.add('hidden'), 1500);
       }, 1200);
     }
 
