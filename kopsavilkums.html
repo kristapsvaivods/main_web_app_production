@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ražošanas Uzskaite - Kopsavilkums</title>
+  <title>Ražošanas Uzskaite - Pēc Datuma</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: system-ui, sans-serif; }
@@ -16,11 +16,32 @@
 
   <div class="max-w-5xl mx-auto">
     <div class="bg-white shadow rounded-2xl p-6 mb-6">
-      <h1 class="text-2xl font-bold text-emerald-700">Ražošanas kopsavilkums</h1>
-      <p class="text-emerald-600">Grupēts pēc Ražojums + Valoda</p>
+      <h1 class="text-2xl font-bold text-emerald-700 mb-2">Ražošanas uzskaite</h1>
+      <p class="text-emerald-600 mb-4">Izvēlies datumu un skaties kopsavilkumu</p>
+      
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-emerald-700 mb-1">Izvēlies datumu</label>
+          <input id="selected-date" type="date" 
+                 class="w-full border border-emerald-300 rounded-2xl px-4 py-3 text-base"
+                 onchange="loadEntriesForDate()">
+        </div>
+        <button onclick="loadEntriesForDate()" 
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-2xl font-medium self-end">
+          Rādīt ierakstus
+        </button>
+      </div>
     </div>
 
     <div class="bg-white shadow-xl rounded-3xl overflow-hidden">
+      <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+        <h2 id="date-title" class="font-semibold text-lg">Izvēlies datumu augšā</h2>
+        <button onclick="addNewEntry()" 
+                class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm">
+          + Jauns ieraksts
+        </button>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="header-bg">
@@ -38,7 +59,7 @@
           <tbody id="table-body"></tbody>
           <tfoot>
             <tr class="bg-emerald-100 font-bold">
-              <td colspan="2" class="text-left pl-6">KOPĀ VISI</td>
+              <td colspan="2" class="text-left pl-6">KOPĀ ŠAI DIENAI</td>
               <td id="total-bundza">0</td>
               <td id="total-250">0</td>
               <td id="total-1kg">0</td>
@@ -52,33 +73,99 @@
     </div>
   </div>
 
+  <!-- Add New Entry Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md">
+      <div class="bg-emerald-600 text-white p-5 rounded-t-3xl flex justify-between">
+        <h2 class="font-semibold">Jauns ieraksts</h2>
+        <button onclick="closeModal()" class="text-3xl">×</button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-emerald-700 mb-1">Ražojums (kafijas veids)</label>
+          <input id="input-raz" type="text" placeholder="Piem. CB Classic" class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-emerald-700 mb-1">Datums</label>
+          <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-emerald-700 mb-3">Iepakojuma daudzums</label>
+          <div class="grid grid-cols-3 gap-4">
+            <div><label class="text-xs text-emerald-600">Bundža</label><input id="input-bundza" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">250 paka</label><input id="input-250" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">1 kg</label><input id="input-1kg" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">3 kg</label><input id="input-3kg" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">500 paka</label><input id="input-500" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+            <div><label class="text-xs text-emerald-600">ZW</label><input id="input-zw" type="number" min="0" class="w-full border rounded-xl py-2 text-center"></div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-emerald-700 mb-1">Valoda</label>
+          <select id="input-valoda" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
+            <option value="LV">LV</option>
+            <option value="ENG">ENG</option>
+            <option value="EE">EE</option>
+            <option value="LT">LT</option>
+            <option value="FR">FR</option>
+            <option value="PT">PT</option>
+          </select>
+        </div>
+      </div>
+      <div class="border-t flex">
+        <button onclick="closeModal()" class="flex-1 py-4">Atcelt</button>
+        <button onclick="saveEntry()" class="flex-1 py-4 bg-emerald-600 text-white font-semibold">Saglabāt</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwzYe_7TYWeRNYXOKy_R6FDwclYEMSWkJUAqhJyEbAkDsXiN1QfMQzLwLA_ZMu6D4/exec";
 
-    let entries = [];
+    let allEntries = [];
 
-    async function loadData() {
+    async function loadAllData() {
       try {
         const resp = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
         const result = await resp.json();
-
         if (result.status === 'success') {
-          entries = result.data || [];
-          renderGroupedTable();
+          allEntries = result.data || [];
         }
       } catch (e) {
-        console.error("Load error:", e);
+        console.error(e);
       }
     }
 
-    function renderGroupedTable() {
+    function formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+    }
+
+    function loadEntriesForDate() {
+      const selectedDate = document.getElementById('selected-date').value;
+      if (!selectedDate) return;
+
+      document.getElementById('date-title').textContent = `Ieraksti ${formatDate(selectedDate)}`;
+
+      const filtered = allEntries.filter(entry => {
+        if (!entry.date) return false;
+        // Handle both YYYY-MM-DD and full ISO strings
+        const entryDate = String(entry.date).split('T')[0];
+        return entryDate === selectedDate;
+      });
+
+      renderGroupedTable(filtered);
+    }
+
+    function renderGroupedTable(entriesForDay) {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
       const groups = {};
 
-      entries.forEach(entry => {
-        const key = `${entry.razojums || 'Nezināms'} | ${entry.valoda || 'N/A'}`;
+      entriesForDay.forEach(entry => {
+        const key = `${entry.razojums || 'Nezināms'}|${entry.valoda || 'N/A'}`;
 
         if (!groups[key]) {
           groups[key] = {
@@ -126,7 +213,7 @@
         grandTotals.zw += group.zw;
       });
 
-      // Update grand totals
+      // Update totals
       document.getElementById('total-bundza').textContent = grandTotals.bundza || '';
       document.getElementById('total-250').textContent = grandTotals.pak250 || '';
       document.getElementById('total-1kg').textContent = grandTotals.kg1 || '';
@@ -135,8 +222,60 @@
       document.getElementById('total-zw').textContent = grandTotals.zw || '';
     }
 
-    // Load data when page opens
-    window.addEventListener('load', loadData);
+    function addNewEntry() {
+      const today = new Date().toISOString().slice(0,10);
+      document.getElementById('input-date').value = today;
+      document.getElementById('input-raz').value = '';
+      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
+        document.getElementById('input-'+id).value = '';
+      });
+      document.getElementById('input-valoda').value = 'LV';
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function saveEntry() {
+      const payload = {
+        date: document.getElementById('input-date').value,
+        raz: document.getElementById('input-raz').value.trim(),
+        bundza: Number(document.getElementById('input-bundza').value) || 0,
+        pak250: Number(document.getElementById('input-250').value) || 0,
+        kg1: Number(document.getElementById('input-1kg').value) || 0,
+        kg3: Number(document.getElementById('input-3kg').value) || 0,
+        pak500: Number(document.getElementById('input-500').value) || 0,
+        zw: Number(document.getElementById('input-zw').value) || 0,
+        valoda: document.getElementById('input-valoda').value
+      };
+
+      closeModal();
+
+      const statusEl = document.getElementById('sync-status');
+      statusEl.classList.remove('hidden');
+
+      fetch(SHEET_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+
+      setTimeout(() => {
+        loadAllData();
+        const currentDate = document.getElementById('selected-date').value;
+        if (currentDate) loadEntriesForDate();
+        setTimeout(() => statusEl.classList.add('hidden'), 1500);
+      }, 1200);
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+      loadAllData();
+      // Set today's date by default
+      document.getElementById('selected-date').value = new Date().toISOString().slice(0,10);
+    });
   </script>
 </body>
 </html>
