@@ -128,7 +128,6 @@
 
     async function loadData() {
       try {
-        statusEl.textContent = "Ielādē datus...";
         const resp = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
         const result = await resp.json();
         if (result.status === 'success') {
