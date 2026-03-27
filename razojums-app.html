@@ -2,72 +2,154 @@
 <html lang="lv">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ražošanas Uzskaites App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ražošanas Uzskaite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: system-ui, sans-serif; }
-    th, td { border: 1px solid #86efac; padding: 10px 8px; text-align: center; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    th, td { 
+      padding: 8px 4px; 
+      font-size: 13px; 
+      text-align: center; 
+      border: 1px solid #86efac;
+    }
     .header-bg { background-color: #86efac; }
+    .scroll-container { 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    input[type="number"] {
+      width: 55px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .modal-content {
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    @media (max-width: 640px) {
+      th, td {
+        padding: 6px 3px;
+        font-size: 12px;
+      }
+      .text-base { font-size: 15px; }
+    }
   </style>
 </head>
-<body class="bg-gray-50 p-4">
+<body class="bg-gray-50 min-h-screen pb-8">
 
-  <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold text-emerald-700 mb-2">Ražošanas uzskaite</h1>
-    <p class="mb-6 text-red-600">Check F12 → Console for debug info</p>
+  <div class="max-w-7xl mx-auto p-3 sm:p-4">
 
-    <button onclick="addNewEntry()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl mb-6">
-      + Pievienot ierakstu
-    </button>
+    <!-- Header -->
+    <div class="bg-white shadow rounded-2xl p-4 mb-5">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-emerald-700">Ražošanas uzskaite</h1>
+          <p class="text-emerald-600 text-sm">Kopīga versija • Dati Google Sheets</p>
+        </div>
+        <button onclick="addNewEntry()" 
+                class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-5 py-3 rounded-xl flex items-center gap-2 text-sm active:scale-95 transition">
+          <span class="text-xl leading-none">+</span> 
+          <span>Pievienot ierakstu</span>
+        </button>
+      </div>
+      <div id="sync-status" class="mt-3 text-center text-sm text-emerald-600 hidden">Saglabāts! ✓</div>
+    </div>
 
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-      <table class="w-full">
-        <thead class="header-bg">
-          <tr>
-            <th>DATUMS</th>
-            <th>RAŽOJUMS</th>
-            <th>Bundža</th>
-            <th>250 paka</th>
-            <th>1 kg paka</th>
-            <th>3 kg paka</th>
-            <th>500 paka</th>
-            <th>ZW</th>
-            <th>VALODA</th>
-          </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
+    <!-- Table -->
+    <div class="bg-white shadow-xl rounded-3xl overflow-hidden">
+      <div class="scroll-container">
+        <table class="w-full min-w-[850px] text-xs sm:text-sm">
+          <thead>
+            <tr class="header-bg">
+              <th class="py-3">DATUMS</th>
+              <th class="py-3">RAŽOJUMS</th>
+              <th colspan="6" class="py-3">FORMĀTS</th>
+              <th class="py-3">VALODA</th>
+            </tr>
+            <tr class="header-bg text-[10px] sm:text-xs">
+              <th></th>
+              <th></th>
+              <th>Bundža</th>
+              <th>250 paka</th>
+              <th>1 kg</th>
+              <th>3 kg</th>
+              <th>500 paka</th>
+              <th>ZW</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="text-gray-700"></tbody>
+          <tfoot>
+            <tr class="bg-emerald-100 font-bold text-emerald-900">
+              <td colspan="2" class="text-left pl-4 py-3">KOPĀ</td>
+              <td id="total-bundza">0</td>
+              <td id="total-250">0</td>
+              <td id="total-1kg">0</td>
+              <td id="total-3kg">0</td>
+              <td id="total-500">0</td>
+              <td id="total-zw">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-4 text-center text-xs text-gray-500">
+      Dati sinhronizējas automātiski
     </div>
   </div>
 
-  <!-- Simple Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl w-full max-w-md mx-4 p-6">
-      <h2 class="text-xl font-bold mb-4">Jauns ieraksts</h2>
-      
-      <input id="input-date" type="date" class="w-full border p-3 rounded mb-3">
-      <input id="input-raz" type="text" placeholder="Ražojums" class="w-full border p-3 rounded mb-3">
-
-      <div class="grid grid-cols-3 gap-3 text-sm mb-4">
-        <div><input id="input-bundza" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-250" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-1kg" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-3kg" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-500" type="number" value="0" class="w-full border p-2 text-center"></div>
-        <div><input id="input-zw" type="number" value="0" class="w-full border p-2 text-center"></div>
+  <!-- Mobile-friendly Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 p-3">
+    <div class="bg-white rounded-3xl w-full max-w-md modal-content">
+      <div class="bg-emerald-600 text-white px-5 py-4 rounded-t-3xl flex justify-between items-center">
+        <h2 class="text-lg font-semibold">Jauns ieraksts</h2>
+        <button onclick="closeModal()" class="text-3xl leading-none">×</button>
       </div>
 
-      <select id="input-valoda" class="w-full border p-3 rounded">
-        <option value="LV">LV</option>
-        <option value="ENG">ENG</option>
-        <option value="EE">EE</option>
-        <option value="LT">LT</option>
-      </select>
+      <div class="p-5 space-y-5">
+        <div>
+          <label class="block text-xs font-medium text-emerald-700 mb-1">Datums</label>
+          <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-2xl px-4 py-3 text-base">
+        </div>
 
-      <div class="flex gap-3 mt-6">
-        <button onclick="closeModal()" class="flex-1 py-3 border rounded-xl">Atcelt</button>
-        <button onclick="saveEntry()" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold">Saglabāt</button>
+        <div>
+          <label class="block text-xs font-medium text-emerald-700 mb-1">Ražojums</label>
+          <input id="input-raz" type="text" placeholder="Produkta nosaukums" 
+                 class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-emerald-700 mb-2">Formāts</label>
+          <div class="grid grid-cols-3 gap-3">
+            <div><label class="text-[10px] text-emerald-600">Bundža</label><input id="input-bundza" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
+            <div><label class="text-[10px] text-emerald-600">250 paka</label><input id="input-250" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
+            <div><label class="text-[10px] text-emerald-600">1 kg</label><input id="input-1kg" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
+            <div><label class="text-[10px] text-emerald-600">3 kg</label><input id="input-3kg" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
+            <div><label class="text-[10px] text-emerald-600">500 paka</label><input id="input-500" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
+            <div><label class="text-[10px] text-emerald-600">ZW</label><input id="input-zw" type="number" min="0" value="0" class="w-full border rounded-xl px-3 py-2 text-center"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-emerald-700 mb-1">Valoda</label>
+          <select id="input-valoda" class="w-full border border-emerald-300 rounded-2xl px-4 py-3 text-base">
+            <option value="LV">LV</option>
+            <option value="ENG">ENG</option>
+            <option value="EE">EE</option>
+            <option value="LT">LT</option>
+            <option value="FR">FR</option>
+            <option value="PT">PT</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="p-4 border-t flex gap-3">
+        <button onclick="closeModal()" class="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium text-sm">Atcelt</button>
+        <button onclick="saveEntry()" class="flex-1 py-3.5 bg-emerald-600 text-white rounded-2xl font-semibold text-sm">Saglabāt</button>
       </div>
     </div>
   </div>
@@ -79,44 +161,67 @@
 
     async function loadData() {
       try {
-        console.log("Fetching data from sheet...");
-        const res = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
-        const data = await res.json();
-        console.log("Load response:", data);
-        if (data.status === 'success') {
-          entries = data.data || [];
+        const resp = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
+        const result = await resp.json();
+        if (result.status === 'success') {
+          entries = result.data || [];
+          entries.sort((a,b) => new Date(b.date) - new Date(a.date));
           renderTable();
         }
-      } catch (e) {
-        console.error("Load failed:", e);
+      } catch (err) {
+        console.error(err);
       }
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
     }
 
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
-      entries.forEach(e => {
+
+      let tBundza=0, t250=0, t1kg=0, t3kg=0, t500=0, tZw=0;
+
+      entries.forEach(entry => {
         const tr = document.createElement('tr');
+        tr.className = 'hover:bg-emerald-50';
         tr.innerHTML = `
-          <td>${e.date || '-'}</td>
-          <td>${e.razojums || '-'}</td>
-          <td>${e.bundza || 0}</td>
-          <td>${e.pak250 || 0}</td>
-          <td>${e.kg1 || 0}</td>
-          <td>${e.kg3 || 0}</td>
-          <td>${e.pak500 || 0}</td>
-          <td>${e.zw || 0}</td>
-          <td>${e.valoda || '-'}</td>
+          <td>${formatDate(entry.date)}</td>
+          <td class="text-left pl-2">${entry.razojums || '-'}</td>
+          <td>${entry.bundza || 0}</td>
+          <td>${entry.pak250 || 0}</td>
+          <td>${entry.kg1 || 0}</td>
+          <td>${entry.kg3 || 0}</td>
+          <td>${entry.pak500 || 0}</td>
+          <td>${entry.zw || 0}</td>
+          <td>${entry.valoda || '-'}</td>
         `;
         tbody.appendChild(tr);
+
+        tBundza += Number(entry.bundza) || 0;
+        t250 += Number(entry.pak250) || 0;
+        t1kg += Number(entry.kg1) || 0;
+        t3kg += Number(entry.kg3) || 0;
+        t500 += Number(entry.pak500) || 0;
+        tZw += Number(entry.zw) || 0;
       });
+
+      document.getElementById('total-bundza').textContent = tBundza;
+      document.getElementById('total-250').textContent = t250;
+      document.getElementById('total-1kg').textContent = t1kg;
+      document.getElementById('total-3kg').textContent = t3kg;
+      document.getElementById('total-500').textContent = t500;
+      document.getElementById('total-zw').textContent = tZw;
     }
 
     function addNewEntry() {
       document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
       document.getElementById('input-raz').value = '';
       ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
-        document.getElementById('input-' + id).value = 0;
+        document.getElementById('input-'+id).value = 0;
       });
       document.getElementById('input-valoda').value = 'LV';
       document.getElementById('modal').classList.remove('hidden');
@@ -127,8 +232,11 @@
     }
 
     function saveEntry() {
+      const date = document.getElementById('input-date').value;
+      if (!date) return alert('Izvēlies datumu!');
+
       const payload = {
-        date: document.getElementById('input-date').value,
+        date,
         raz: document.getElementById('input-raz').value.trim(),
         bundza: Number(document.getElementById('input-bundza').value) || 0,
         pak250: Number(document.getElementById('input-250').value) || 0,
@@ -139,26 +247,26 @@
         valoda: document.getElementById('input-valoda').value
       };
 
-      console.log("→ Sending payload:", payload);
-
       closeModal();
+
+      const statusEl = document.getElementById('sync-status');
+      statusEl.classList.remove('hidden');
+      statusEl.textContent = "Saglabāts! ✓";
 
       fetch(SHEET_WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
-      })
-      .then(() => {
-        console.log("POST request sent - waiting for sheet update...");
-        setTimeout(loadData, 2000);
-      })
-      .catch(err => console.error("Fetch error:", err));
+      }).catch(err => console.error(err));
+
+      setTimeout(() => {
+        loadData();
+        setTimeout(() => statusEl.classList.add('hidden'), 1200);
+      }, 1000);
     }
 
-    window.onload = () => {
-      loadData();
-    };
+    window.addEventListener('load', loadData);
   </script>
 </body>
 </html>
