@@ -1,180 +1,89 @@
-<!DOCTYPE html>
-<html lang="lv">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ražošanas Uzskaite - Debug</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 p-4">
+// === FINAL ROBUST VERSION - March 2026 ===
 
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold text-emerald-700 mb-4">Ražošanas uzskaite (Debug Mode)</h1>
-    
-    <button onclick="addNewEntry()" 
-            class="bg-emerald-600 text-white px-6 py-3 rounded-xl mb-6">
-      + Pievienot ierakstu
-    </button>
+function doGet(e) {
+  try {
+    const action = e?.parameter?.action || '';
 
-    <div class="bg-white shadow rounded-2xl p-4 mb-6">
-      <h2 class="font-semibold mb-2">Raw Data from Google Sheet:</h2>
-      <pre id="debug-raw" class="bg-gray-100 p-3 rounded text-xs overflow-auto max-h-60"></pre>
-    </div>
+    if (action !== 'getAll') {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        status: 'error', 
+        message: 'Invalid action' 
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    <div class="bg-white shadow-xl rounded-3xl overflow-hidden">
-      <table class="w-full">
-        <thead class="bg-emerald-600 text-white">
-          <tr>
-            <th class="p-3">DATUMS</th>
-            <th class="p-3 text-left">RAŽOJUMS</th>
-            <th class="p-3">Bundža</th>
-            <th class="p-3">250 paka</th>
-            <th class="p-3">1 kg</th>
-            <th class="p-3">3 kg</th>
-            <th class="p-3">500 paka</th>
-            <th class="p-3">ZW</th>
-            <th class="p-3">VALODA</th>
-          </tr>
-        </thead>
-        <tbody id="table-body" class="text-sm"></tbody>
-      </table>
-    </div>
-  </div>
+    const sheet = SpreadsheetApp.getActiveSheet();
+    const data = sheet.getDataRange().getValues();
 
-  <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md">
-      <div class="bg-emerald-600 text-white p-5 rounded-t-3xl flex justify-between">
-        <h2 class="font-semibold">Jauns ieraksts</h2>
-        <button onclick="closeModal()" class="text-3xl">×</button>
-      </div>
-      <div class="p-6 space-y-5">
-        <div>
-          <label class="block text-sm font-medium mb-1">Ražojums</label>
-          <input id="input-raz" type="text" placeholder="Kafijas veids" class="w-full border-2 border-emerald-300 rounded-2xl px-4 py-3">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Datums</label>
-          <input id="input-date" type="date" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">Formāts</label>
-          <div class="grid grid-cols-3 gap-3">
-            <input id="input-bundza" type="number" value="" placeholder="" class="border p-2 text-center rounded-xl">
-            <input id="input-250" type="number" value="" placeholder="" class="border p-2 text-center rounded-xl">
-            <input id="input-1kg" type="number" value="" placeholder="" class="border p-2 text-center rounded-xl">
-            <input id="input-3kg" type="number" value="" placeholder="" class="border p-2 text-center rounded-xl">
-            <input id="input-500" type="number" value="" placeholder="" class="border p-2 text-center rounded-xl">
-            <input id="input-zw" type="number" value="" placeholder="" class="border p-2 text-center rounded-xl">
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Valoda</label>
-          <select id="input-valoda" class="w-full border border-emerald-300 rounded-2xl px-4 py-3">
-            <option value="LV">LV</option>
-            <option value="ENG">ENG</option>
-            <option value="EE">EE</option>
-            <option value="LT">LT</option>
-          </select>
-        </div>
-      </div>
-      <div class="border-t flex">
-        <button onclick="closeModal()" class="flex-1 py-4">Atcelt</button>
-        <button onclick="saveEntry()" class="flex-1 py-4 bg-emerald-600 text-white font-semibold">Saglabāt</button>
-      </div>
-    </div>
-  </div>
+    const rows = data.slice(1).map(row => ({
+      date:     row[0] ? String(row[0]) : '',
+      razojums: String(row[1] || ''),
+      bundza:   Number(row[2]) || 0,
+      pak250:   Number(row[3]) || 0,
+      kg1:      Number(row[4]) || 0,
+      kg3:      Number(row[5]) || 0,
+      pak500:   Number(row[6]) || 0,
+      zw:       Number(row[7]) || 0,
+      valoda:   String(row[8] || '')
+    }));
 
-  <script>
-    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUh_fnF2ETkSXqbqzfBHW4PIRQgUXnwf8sgzxL-riACRNvDSKjC4xN2liTw1Wzo8tb/exec";
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: 'success', 
+      data: rows 
+    })).setMimeType(ContentService.MimeType.JSON);
 
-    let entries = [];
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: 'error', 
+      message: err.message 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
-    async function loadData() {
+function doPost(e) {
+  try {
+    let payload;
+
+    // Try to parse JSON from different possible formats
+    if (e && e.postData && e.postData.contents) {
       try {
-        const resp = await fetch(`${SHEET_WEB_APP_URL}?action=getAll`);
-        const result = await resp.json();
-        
-        console.log("Raw data from Google Sheets:", result);   // ← Important for debugging
-
-        if (result.status === 'success') {
-          entries = result.data || [];
-          entries.sort((a,b) => new Date(b.date) - new Date(a.date));
-          document.getElementById('debug-raw').textContent = JSON.stringify(entries, null, 2);
-          renderTable();
-        } else {
-          console.error("Error from server:", result.message);
-        }
-      } catch (e) {
-        console.error("Load failed:", e);
+        payload = JSON.parse(e.postData.contents);
+      } catch (parseErr) {
+        // If JSON parse fails, try to log raw data
+        console.log("Raw postData:", e.postData.contents);
+        throw new Error("JSON parse failed: " + parseErr.message);
       }
+    } else {
+      throw new Error("No postData received");
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('table-body');
-      tbody.innerHTML = '';
+    console.log("Received payload:", payload);
 
-      entries.forEach(entry => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${entry.date || '-'}</td>
-          <td class="text-left">${entry.razojums || entry.raz || '-'}</td>
-          <td>${entry.bundza || ''}</td>
-          <td>${entry.pak250 || ''}</td>
-          <td>${entry.kg1 || ''}</td>
-          <td>${entry.kg3 || ''}</td>
-          <td>${entry.pak500 || ''}</td>
-          <td>${entry.zw || ''}</td>
-          <td>${entry.valoda || '-'}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+    const sheet = SpreadsheetApp.getActiveSheet();
 
-    function addNewEntry() {
-      document.getElementById('input-date').value = new Date().toISOString().slice(0,10);
-      document.getElementById('input-raz').value = '';
-      ['bundza','250','1kg','3kg','500','zw'].forEach(id => {
-        document.getElementById('input-'+id).value = '';
-      });
-      document.getElementById('input-valoda').value = 'LV';
-      document.getElementById('modal').classList.remove('hidden');
-    }
+    sheet.appendRow([
+      payload.date || '',
+      payload.raz || '',
+      payload.bundza || 0,
+      payload.pak250 || 0,
+      payload.kg1 || 0,
+      payload.kg3 || 0,
+      payload.pak500 || 0,
+      payload.zw || 0,
+      payload.valoda || ''
+    ]);
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
+    SpreadsheetApp.flush();
 
-    function saveEntry() {
-      const payload = {
-        date: document.getElementById('input-date').value,
-        raz: document.getElementById('input-raz').value.trim(),
-        bundza: Number(document.getElementById('input-bundza').value) || 0,
-        pak250: Number(document.getElementById('input-250').value) || 0,
-        kg1: Number(document.getElementById('input-1kg').value) || 0,
-        kg3: Number(document.getElementById('input-3kg').value) || 0,
-        pak500: Number(document.getElementById('input-500').value) || 0,
-        zw: Number(document.getElementById('input-zw').value) || 0,
-        valoda: document.getElementById('input-valoda').value
-      };
+    console.log("Row appended successfully");
 
-      closeModal();
+    return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+      .setMimeType(ContentService.MimeType.JSON);
 
-      fetch(SHEET_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-
-      document.getElementById('sync-status').classList.remove('hidden');
-      setTimeout(() => {
-        loadData();
-        setTimeout(() => document.getElementById('sync-status').classList.add('hidden'), 1500);
-      }, 1200);
-    }
-
-    window.addEventListener('load', loadData);
-  </script>
-</body>
-</html>
+  } catch (err) {
+    console.error("doPost Error:", err.message);
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: 'error', 
+      message: err.message 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
